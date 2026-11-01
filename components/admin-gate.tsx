@@ -14,8 +14,17 @@ type Mode = "login" | "first" | "forgot";
 async function post<T extends { detail?: string }>(url: string, body: unknown): Promise<{ ok: boolean; data: T | null }> {
   try {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const data = (await res.json().catch(() => null)) as T | null;
-    if (!res.ok && !data?.detail) return { ok: false, data: { ...(data ?? {}), detail: `HTTP ${res.status}` } as T };
+    const raw = await res.text().catch(() => "");
+    let data: T | null = null;
+    try {
+      data = JSON.parse(raw) as T;
+    } catch {
+      data = null;
+    }
+    if (!res.ok && !data?.detail) {
+      const snippet = raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160);
+      return { ok: false, data: { ...(data ?? {}), detail: snippet ? `HTTP ${res.status}: ${snippet}` : `HTTP ${res.status}` } as T };
+    }
     return { ok: res.ok, data };
   } catch (err) {
     return { ok: false, data: { detail: `network: ${err instanceof Error ? err.message : "failed"}` } as T };
