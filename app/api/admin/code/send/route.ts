@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
   const steps: Record<string, string> = {};
   try {
-    const { challenge } = newChallenge("check@example.com");
+    const { challenge } = await newChallenge("check@example.com");
     steps.challenge = challenge ? "ok" : "empty";
   } catch (err) {
     steps.challenge = `failed: ${err instanceof Error ? err.message : String(err)}`.slice(0, 200);
@@ -50,7 +50,7 @@ async function handle(req: Request) {
   const key = process.env.RESEND_API_KEY;
   if (!key || !process.env.ADMIN_AUTH_SECRET) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
-  const { code, challenge } = newChallenge(email);
+  const { code, challenge } = await newChallenge(email);
   if (!isAdminEmail(email)) return NextResponse.json({ ok: true, challenge });
 
   const res = await fetch("https://api.resend.com/emails", {

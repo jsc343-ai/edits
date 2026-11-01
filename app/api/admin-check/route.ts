@@ -11,7 +11,7 @@ export async function GET() {
     ADMIN_MAIL_FROM: process.env.ADMIN_MAIL_FROM ? "set" : "missing",
   };
   try {
-    const { challenge } = newChallenge("check@example.com");
+    const { challenge } = await newChallenge("check@example.com");
     steps.challenge = challenge ? "ok" : "empty";
   } catch (err) {
     steps.challenge = `failed: ${err instanceof Error ? err.message : String(err)}`.slice(0, 200);

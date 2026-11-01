@@ -7,6 +7,6 @@ export async function POST(req: Request) {
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   const code = typeof body?.code === "string" ? body.code.trim() : "";
   const challenge = typeof body?.challenge === "string" ? body.challenge : "";
-  const ok = isAdminEmail(email) && checkChallenge(email, code, challenge);
+  const ok = isAdminEmail(email) && (await checkChallenge(email, code, challenge));
   return NextResponse.json({ ok }, { status: ok ? 200 : 400 });
 }
