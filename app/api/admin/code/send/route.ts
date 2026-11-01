@@ -3,6 +3,15 @@ import { isAdminEmail } from "@/lib/app-config";
 import { newChallenge } from "@/lib/admin-code";
 
 export async function POST(req: Request) {
+  try {
+    return await handle(req);
+  } catch (err) {
+    const detail = `server error: ${err instanceof Error ? err.message : String(err)}`.slice(0, 300);
+    return NextResponse.json({ error: "send_failed", detail }, { status: 500 });
+  }
+}
+
+async function handle(req: Request) {
   const body = (await req.json().catch(() => null)) as { email?: unknown } | null;
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "bad_email" }, { status: 400 });
@@ -24,6 +33,10 @@ export async function POST(req: Request) {
     }),
   }).catch(() => null);
 
-  if (!res || !res.ok) return NextResponse.json({ error: "send_failed" }, { status: 502 });
+  if (!res || !res.ok) {
+    const info = res ? ((await res.json().catch(() => null)) as { message?: string } | null) : null;
+    const detail = (info?.message ?? (res ? `HTTP ${res.status}` : "network error")).slice(0, 300);
+    return NextResponse.json({ error: "send_failed", detail }, { status: 502 });
+  }
   return NextResponse.json({ ok: true, challenge });
 }
