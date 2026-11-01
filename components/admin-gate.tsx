@@ -11,12 +11,14 @@ import { checkPassword, loadAdminCred, saveAdminCred, type Profile, type Session
 
 type Mode = "login" | "first" | "forgot";
 
-async function post<T>(url: string, body: unknown): Promise<{ ok: boolean; data: T | null }> {
+async function post<T extends { detail?: string }>(url: string, body: unknown): Promise<{ ok: boolean; data: T | null }> {
   try {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    return { ok: res.ok, data: (await res.json().catch(() => null)) as T | null };
-  } catch {
-    return { ok: false, data: null };
+    const data = (await res.json().catch(() => null)) as T | null;
+    if (!res.ok && !data?.detail) return { ok: false, data: { ...(data ?? {}), detail: `HTTP ${res.status}` } as T };
+    return { ok: res.ok, data };
+  } catch (err) {
+    return { ok: false, data: { detail: `network: ${err instanceof Error ? err.message : "failed"}` } as T };
   }
 }
 
@@ -62,14 +64,14 @@ export function AdminGate({ session, onVerified }: { session: Session; onVerifie
     if (busy || cooldown > 0) return;
     setBusy(true);
     setError(null);
-    const r = await post<{ challenge?: string; error?: string }>("/api/admin/code/send", { email: session.email });
+    const r = await post<{ challenge?: string; error?: string; detail?: string }>("/api/admin/code/send", { email: session.email });
     setBusy(false);
     if (!r.ok || !r.data?.challenge) {
-      setError(
+      const base =
         r.data?.error === "not_configured"
           ? L("寄信服務尚未啟用，請先完成郵件設定。", "The mail service is not set up yet.")
-          : L("驗證碼寄送失敗，請稍後再試。", "Could not send the code. Please try again."),
-      );
+          : L("驗證碼寄送失敗，請稍後再試。", "Could not send the code. Please try again.");
+      setError(r.data?.detail ? `${base} (${r.data.detail})` : base);
       return;
     }
     setChallenge(r.data.challenge);

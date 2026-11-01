@@ -176,11 +176,24 @@ export function SaveDialog({ pending, onClose }: { pending: PendingSave | null; 
               {previewUrl && (
                 <div className="flex justify-center rounded-xl bg-secondary p-2">
                   {isVideo ? (
-                    <video src={previewUrl} controls playsInline muted className="max-h-44 rounded-lg" />
+                    <video src={previewUrl} controls playsInline className="max-h-64 rounded-lg" />
                   ) : (
-                    <img src={previewUrl} alt={L("作品預覽，可長按儲存", "Preview. Press and hold to save.")} className="max-h-44 rounded-lg object-contain" />
+                    <img src={previewUrl} alt={L("作品預覽，可長按儲存", "Preview. Press and hold to save.")} className="max-h-64 rounded-lg object-contain" />
                   )}
                 </div>
+              )}
+              {previewUrl && !done && (
+                <p className="rounded-xl bg-secondary p-3 text-foreground">
+                  {isVideo
+                    ? L(
+                        "若按「下載」沒反應（Pi 瀏覽器常見）：先按上面影片的播放鍵，再點右下角「⋮」選「下載」；或用下方「分享」。",
+                        "If Download does nothing (common in Pi Browser): use the video's ⋮ menu and choose Download, or use Share below.",
+                      )
+                    : L(
+                        "若按「下載」沒反應（Pi 瀏覽器常見）：直接長按上面的圖片，選「儲存圖片」或「加入照片」即可存到相簿。",
+                        "If Download does nothing (common in Pi Browser): press and hold the image above and choose Save Image.",
+                      )}
+                </p>
               )}
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-xl bg-secondary p-3 text-foreground">
                 <dt className="text-muted-foreground">{L("檔名", "File")}</dt>
