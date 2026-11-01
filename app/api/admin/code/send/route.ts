@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { isAdminEmail } from "@/lib/app-config";
 import { newChallenge } from "@/lib/admin-code";
 
+export async function GET() {
+  return NextResponse.json({
+    ADMIN_AUTH_SECRET: Boolean(process.env.ADMIN_AUTH_SECRET),
+    RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
+    ADMIN_MAIL_FROM: Boolean(process.env.ADMIN_MAIL_FROM),
+  });
+}
+
 export async function POST(req: Request) {
   try {
     return await handle(req);
