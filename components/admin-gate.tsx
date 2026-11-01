@@ -80,7 +80,8 @@ export function AdminGate({ session, onVerified }: { session: Session; onVerifie
         r.data?.error === "not_configured"
           ? L("寄信服務尚未啟用，請先完成郵件設定。", "The mail service is not set up yet.")
           : L("驗證碼寄送失敗，請稍後再試。", "Could not send the code. Please try again.");
-      setError(r.data?.detail ? `${base} (${r.data.detail})` : base);
+      const where = typeof window !== "undefined" ? window.location.host : "";
+      setError(r.data?.detail ? `${base} (${r.data.detail}) [${where}]` : `${base} [${where}]`);
       return;
     }
     setChallenge(r.data.challenge);

@@ -49,7 +49,6 @@ export function LoginCard({ onLogin }: { onLogin: (s: Session) => void }) {
         await saveProfile(mail, password);
       } else {
         if (!profile) return setError(L("尚未建立帳戶，請先使用「首次登入」。", "No account yet. Please use First login."));
-        if (profile.email !== mail) return setError(L("郵箱與帳戶不符，無法重設。", "Email does not match this account."));
         await saveProfile(mail, password);
       }
       onLogin({ username: username.trim(), email: mail });
@@ -115,6 +114,11 @@ export function LoginCard({ onLogin }: { onLogin: (s: Session) => void }) {
         </div>
       </div>
 
+      {mode === "forgot" && (
+        <p className="text-xs text-muted-foreground">
+          {L("重設時會同時更新此 Pi 帳號綁定的郵箱與密碼。", "Resetting also updates the email and password linked to this Pi account.")}
+        </p>
+      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
