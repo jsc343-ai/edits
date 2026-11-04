@@ -20,10 +20,10 @@ export async function POST(req: Request) {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || "Jsc343 AI Edits 2 <onboarding@resend.dev>",
+      from: process.env.EMAIL_FROM || "JSC343 AI EDITS <onboarding@resend.dev>",
       to: [email],
       subject: "Admin login code",
-      text: `Your Jsc343 AI Edits 2 admin login code is ${code}. It expires in 10 minutes.`,
+      text: `Your JSC343 AI EDITS admin login code is ${code}. It expires in 10 minutes.`,
     }),
   });
   if (!res.ok) return NextResponse.json({ error: "send_failed" }, { status: 502 });
