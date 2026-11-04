@@ -77,7 +77,7 @@ function LoginForm({ configured, onDone }: { configured: boolean; onDone: () => 
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code, token }),
+        body: JSON.stringify(token ? { email, code, token } : { email, passcode: code }),
       });
       if (!res.ok) throw new Error();
       onDone();
@@ -104,24 +104,26 @@ function LoginForm({ configured, onDone }: { configured: boolean; onDone: () => 
           className="h-11"
         />
       </div>
-      {token ? (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="admin-code">{t("adminCode")}</Label>
-          <Input
-            id="admin-code"
-            inputMode="numeric"
-            maxLength={6}
-            autoComplete="one-time-code"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-            className="h-11"
-          />
-        </div>
-      ) : null}
-      <Button type="submit" className="h-11" disabled={busy || !email || !configured || (Boolean(token) && code.length !== 6)}>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="admin-code">{t("adminCode")}</Label>
+        <Input
+          id="admin-code"
+          type="password"
+          autoComplete="one-time-code"
+          value={code}
+          onChange={(e) => setCode(token ? e.target.value.replace(/\D/g, "").slice(0, 6) : e.target.value)}
+          className="h-11"
+        />
+      </div>
+      <Button type="submit" className="h-11" disabled={busy || !email || !code || !configured}>
         {busy ? <Spinner /> : null}
-        {token ? t("login") : t("adminSendCode")}
+        {t("login")}
       </Button>
+      {!token ? (
+        <Button type="button" variant="ghost" className="h-11" disabled={busy || !email} onClick={() => void sendCode()}>
+          {t("adminSendCode")}
+        </Button>
+      ) : null}
     </form>
   );
 }
