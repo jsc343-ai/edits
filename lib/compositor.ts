@@ -58,7 +58,7 @@ export const FONTS: { family: string; weight: number; zh: string; en: string }[]
 
 export const fontSpec = (family: string) => FONTS.find((f) => f.family === family) ?? FONTS[0];
 export type FilterId = "none" | "warm" | "cool" | "mono" | "vivid" | "vintage";
-export type Aspect = "9:16" | "1:1" | "16:9" | "3:4" | "4:3" | "4:5";
+export type Aspect = "9:16" | "1:1" | "16:9" | "3:4" | "4:3" | "4:5" | "2:3" | "3:2";
 
 export const TRANSITIONS: { id: TransitionId; zh: string; en: string }[] = [
   { id: "none", zh: "無", en: "None" },
@@ -171,6 +171,9 @@ export interface TextItem {
   edge?: string;
   z?: number;
   rot?: number;
+  sx?: number;
+  sy?: number;
+  alpha?: number;
 }
 
 export type TextStyle = "flat" | "extrude" | "outline" | "plate";
@@ -205,6 +208,8 @@ export function aspectSize(a: Aspect): { w: number; h: number } {
   if (a === "3:4") return { w: 540, h: 720 };
   if (a === "4:3") return { w: 720, h: 540 };
   if (a === "4:5") return { w: 576, h: 720 };
+  if (a === "2:3") return { w: 480, h: 720 };
+  if (a === "3:2") return { w: 720, h: 480 };
   return { w: 404, h: 720 };
 }
 
@@ -664,10 +669,11 @@ export function drawText(ctx: CanvasRenderingContext2D, items: TextItem[], t: nu
     const rise = (1 - ease(clamp((t - it.start) / 0.4, 0, 1))) * H * 0.03;
     const px = (it.size / 100) * W;
     ctx.save();
-    ctx.globalAlpha = a;
-    if (it.rot) {
+    ctx.globalAlpha = a * clamp(it.alpha ?? 1, 0, 1);
+    if (it.rot || it.sx !== undefined || it.sy !== undefined) {
       ctx.translate(it.x * W, it.y * H + rise);
-      ctx.rotate((it.rot * Math.PI) / 180);
+      if (it.rot) ctx.rotate((it.rot * Math.PI) / 180);
+      ctx.scale(clamp(it.sx ?? 1, 0.2, 4), clamp(it.sy ?? 1, 0.2, 4));
       ctx.translate(-it.x * W, -(it.y * H + rise));
     }
     const spec = fontSpec(it.font);
