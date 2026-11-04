@@ -52,20 +52,39 @@ export function HomeScreen() {
       </header>
 
       <section className="flex flex-col gap-5 pt-2">
-        <div className="scene-3d flex justify-center py-4" aria-hidden="true">
-          <div className="float-3d relative h-40 w-64">
-            <div className="absolute inset-0 -rotate-6 rounded-2xl bg-accent/80 shadow-xl" />
-            <div className="absolute inset-0 translate-x-3 translate-y-2 rotate-3 rounded-2xl bg-primary/80 shadow-xl" />
-            <div className="absolute inset-0 flex items-end rounded-2xl border border-border bg-card p-4 shadow-2xl">
-              <div className="h-2 w-2/3 rounded-full bg-muted-foreground/40" />
+        <div className="scene-3d flex justify-center pb-2 pt-6" aria-hidden="true">
+          <div className="float-3d relative h-44 w-72">
+            <div className="absolute inset-0 -rotate-6 rounded-3xl border border-border bg-card shadow-xl">
+              <div className="flex h-full flex-col justify-between p-3">
+                <div className="flex justify-between">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <span key={i} className="size-2 rounded-sm bg-muted-foreground/30" />
+                  ))}
+                </div>
+                <div className="flex justify-between">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <span key={i} className="size-2 rounded-sm bg-muted-foreground/30" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="absolute inset-0 translate-x-2 translate-y-1 rotate-3 rounded-3xl bg-primary shadow-2xl" />
+            <div className="absolute inset-3 flex items-center justify-center rounded-2xl bg-card/95 shadow-inner">
+              <Clapperboard className="size-14 text-primary" />
             </div>
           </div>
         </div>
         <div className="text-center">
+          <p className="mx-auto mb-3 w-fit rounded-full border border-border bg-card px-3 py-1 text-xs font-medium tracking-wide text-muted-foreground">
+            {t("appName")}
+          </p>
           <h1 className="text-balance text-3xl font-bold leading-tight sm:text-4xl">{t("heroTitle")}</h1>
           <p className="mx-auto mt-3 max-w-xl text-pretty leading-relaxed text-muted-foreground">
             {t("heroSub")}
           </p>
+        </div>
+        <div className="rounded-3xl border border-border bg-card/60 p-1 shadow-sm">
+          <AccountCard />
         </div>
         <div className="grid grid-cols-2 gap-3" role="group" aria-label={t("modeText")}>
           {(
@@ -95,7 +114,6 @@ export function HomeScreen() {
         <p className="text-center text-sm text-muted-foreground">{t("notSaved")}</p>
       </section>
 
-      <AccountCard />
       <GuideSection />
       <StorePanel />
 

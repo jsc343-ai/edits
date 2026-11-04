@@ -118,7 +118,7 @@ function makeThumb(el: HTMLImageElement | HTMLVideoElement) {
   return c.toDataURL("image/jpeg", 0.6);
 }
 
-export function EditorView(props: { func: EditFunc; mode: EditMode; onOpenPay: () => void }) {
+export function EditorView(props: { func: EditFunc; mode: EditMode; onOpenPay: () => void; initialFile?: File; initialAspect?: Aspect }) {
   if (props.func !== "single") return <EditorViewInner {...props} lifecycle={null} />;
   return <WorkSession>{(lifecycle) => <EditorViewInner {...props} lifecycle={lifecycle} />}</WorkSession>;
 }
@@ -128,11 +128,15 @@ function EditorViewInner({
   mode,
   onOpenPay,
   lifecycle,
+  initialFile,
+  initialAspect,
 }: {
   func: EditFunc;
   mode: EditMode;
   onOpenPay: () => void;
   lifecycle: WorkLifecycle | null;
+  initialFile?: File;
+  initialAspect?: Aspect;
 }) {
   const { L, t } = useLang();
   const wallet = useWallet();
@@ -159,7 +163,7 @@ function EditorViewInner({
   const [stickers, setStickers] = useState<StickerItem[]>([]);
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const [art, setArt] = useState<ArtState>(DEFAULT_ART);
-  const [aspect, setAspect] = useState<Aspect>("9:16");
+  const [aspect, setAspect] = useState<Aspect>(initialAspect ?? "9:16");
   const [fadeInOut, setFadeInOut] = useState(true);
   const [templateId, setTemplateId] = useState(MOTION_TEMPLATES[0].id);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -315,6 +319,16 @@ function EditorViewInner({
     }
     setLoading(false);
   };
+
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (!initialFile || seeded.current) return;
+    seeded.current = true;
+    const dt = new DataTransfer();
+    dt.items.add(initialFile);
+    addFiles(dt.files);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFile]);
 
   const updateClip = (id: string, patch: Partial<Clip>) =>
     setClips((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
@@ -522,7 +536,7 @@ function EditorViewInner({
 
   const { lang } = useLang();
   const aiGuided = mode === "ai";
-  const [aiStage, setAiStage] = useState<"pick" | "format" | "done">("pick");
+  const [aiStage, setAiStage] = useState<"pick" | "format" | "done">(initialFile ? "done" : "pick");
   const [aiClipIds, setAiClipIds] = useState<string[]>([]);
   const toggleAiClip = (id: string) => setAiClipIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const boxedClips = clips.filter((c) => aiClipIds.includes(c.id));
@@ -602,7 +616,7 @@ function EditorViewInner({
           void runAi();
           break;
         case "set_aspect":
-          if (a.value && ["9:16", "3:4", "4:5", "1:1", "4:3", "16:9"].includes(a.value)) setAspect(a.value as Aspect);
+          if (a.value && ["9:16", "3:4", "4:5", "1:1", "4:3", "16:9", "2:3", "3:2"].includes(a.value)) setAspect(a.value as Aspect);
           break;
         case "set_motion": {
           const m = MOTION_TEMPLATES.find((x) => x.id === a.value);
@@ -925,7 +939,7 @@ function EditorViewInner({
           {aiStage === "format" && (
             <>
               <h3 className="text-sm font-semibold">{L("第 2 步：選定螢幕格式", "Step 2: Choose a screen format")}</h3>
-              <FormatPanel options={["9:16", "3:4", "4:5", "1:1", "4:3", "16:9"] as Aspect[]} value={aspect} onChange={setAspect} />
+              <FormatPanel options={["9:16", "3:4", "4:5", "1:1", "4:3", "16:9", "2:3", "3:2"] as Aspect[]} value={aspect} onChange={setAspect} />
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setAiStage("pick")}>
                   {L("上一步", "Back")}
@@ -1048,7 +1062,7 @@ function EditorViewInner({
         />
       )}
       {tab === "format" && (
-        <FormatPanel options={["9:16", "3:4", "4:5", "1:1", "4:3", "16:9"] as Aspect[]} value={aspect} onChange={setAspect} />
+        <FormatPanel options={["9:16", "3:4", "4:5", "1:1", "4:3", "16:9", "2:3", "3:2"] as Aspect[]} value={aspect} onChange={setAspect} />
       )}
 
       {tab === "frame" && <FramePanel clip={clips.find((c) => c.id === selectedId)} onUpdate={(p) => selectedId && updateClip(selectedId, p)} />}

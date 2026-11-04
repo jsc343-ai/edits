@@ -13,6 +13,7 @@ import { AiCompose } from "@/components/views/ai-compose";
 import { PayView } from "@/components/views/pay-view";
 import { CutoutEditor } from "@/components/views/cutout-editor";
 import { StickerEditor } from "@/components/views/sticker-editor";
+import { RestoreEditor } from "@/components/views/restore-editor";
 import { WalletProvider } from "@/components/wallet-context";
 import { FUNCS_AI, FUNCS_HAND, type EditFunc } from "@/lib/funcs";
 import { translate, type LangCode } from "@/lib/i18n-editor";
@@ -103,6 +104,9 @@ function AppShellInner() {
           {view === "editor" && (func === "card" || func === "collage") && mode === "hand" && <PosterEditor key={`${func}-hand`} variant={func} />}
           {view === "editor" && func === "cutout" && mode && <CutoutEditor key={`cutout-${mode}`} mode={mode} />}
           {view === "editor" && func === "sticker" && mode && <StickerEditor key={`sticker-${mode}`} mode={mode} />}
+          {view === "editor" && func === "restore" && mode && (
+            <RestoreEditor key={`restore-${mode}`} mode={mode} onOpenPay={() => setView("pay")} />
+          )}
           {view === "editor" && (func === "single" || func === "photos" || func === "video") && mode && (
             <EditorView key={`${func}-${mode}`} func={func} mode={mode} onOpenPay={() => setView("pay")} />
           )}
