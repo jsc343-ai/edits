@@ -147,6 +147,7 @@ export function StudioScreen() {
           route: s.route,
           mediaCount: s.media.length,
           plan: s.plan,
+          mode,
         });
         setPlan({
           style: data.style,
